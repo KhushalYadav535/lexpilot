@@ -26,7 +26,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { AgentLoader } from '@/components/lex-pilot/agent-loader'
 import { PlaybookMemory } from '@/components/lex-pilot/playbook-memory'
 import { Input } from '@/components/ui/input'
-import { Loader2, Plus, LogOut, FileText, Search, LayoutGrid, AlignLeft, Calendar, Wand2, BookOpen, GitCompare, ShieldCheck, Languages, Users, ArrowLeft, ArrowUpRight, Settings, Scale, FileSearch, Brain } from 'lucide-react'
+import { Loader2, Plus, LogOut, FileText, Search, LayoutGrid, AlignLeft, Calendar, Wand2, BookOpen, GitCompare, ShieldCheck, Languages, Users, ArrowLeft, ArrowUpRight, Settings, Scale, FileSearch, Brain, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { fetchAPI, removeAuthToken } from '@/lib/api'
 import type { Contract } from '@/lib/constants'
@@ -130,6 +130,18 @@ export default function DashboardPage() {
     removeAuthToken()
     if (typeof window !== 'undefined') localStorage.removeItem('user')
     router.push('/login')
+  }
+
+  const handleDeleteContract = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this contract?')) return;
+    try {
+      await fetchAPI(`/contracts/${id}`, { method: 'DELETE' });
+      setContracts(contracts.filter((c: any) => (c._id || c.id) !== id));
+      if (selectedContractId === id) setSelectedContractId(null);
+    } catch (error) {
+      console.error('Failed to delete contract', error);
+      alert('Failed to delete contract');
+    }
   }
 
   if (isLoading) {
@@ -526,7 +538,17 @@ export default function DashboardPage() {
                                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                     <FileText className="w-5 h-5" />
                                   </div>
-                                  <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                                  <div className="flex gap-1 items-center">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon"
+                                      className="w-7 h-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                                      onClick={(e) => { e.stopPropagation(); handleDeleteContract(id); }}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                    <ArrowUpRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                                  </div>
                                 </div>
                                 <h3 className="font-semibold text-base line-clamp-1 mb-1" title={contract.title}>{contract.title}</h3>
                                 <p className="text-sm text-muted-foreground mb-4 line-clamp-1" title={contract.counterparty}>{contract.counterparty || 'Unknown Party'}</p>
