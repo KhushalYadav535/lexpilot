@@ -79,11 +79,11 @@ export default function DashboardPage() {
     try {
       let newContract;
       
-      if (uploadMode === 'url') {
-        if (!importUrl.trim()) throw new Error('URL is required')
-        newContract = await fetchAPI('/contracts/import-url', {
+      if (uploadMode === 'cloud') {
+        if (!importUrl.trim()) throw new Error('Cloud File URL is required')
+        newContract = await fetchAPI('/contracts/cloud-import', {
           method: 'POST',
-          body: JSON.stringify({ url: importUrl, title: uploadTitle }),
+          body: JSON.stringify({ url: importUrl, title: uploadTitle, provider: 'Google Drive' }),
         })
       } else if (uploadMode === 'email') {
         if (!emailCreds.email || !emailCreds.password) throw new Error('Email credentials required')
@@ -217,7 +217,7 @@ export default function DashboardPage() {
                       <div className="px-6 pt-4">
                         <TabsList className="w-full grid grid-cols-3">
                           <TabsTrigger value="local">Local File</TabsTrigger>
-                          <TabsTrigger value="url">Web Link</TabsTrigger>
+                          <TabsTrigger value="cloud">Cloud Drive</TabsTrigger>
                           <TabsTrigger value="email">Email</TabsTrigger>
                         </TabsList>
                       </div>
@@ -267,16 +267,27 @@ export default function DashboardPage() {
                           />
                         </TabsContent>
 
-                        <TabsContent value="url" className="space-y-4 mt-0">
-                          <div className="space-y-2">
-                            <label className="text-sm font-medium text-foreground">Public File URL</label>
-                            <Input 
-                              placeholder="https://example.com/contract.pdf or Google Drive Link" 
-                              value={importUrl}
-                              onChange={(e) => setImportUrl(e.target.value)}
-                              className="h-12 bg-background/50"
-                            />
-                            <p className="text-xs text-muted-foreground">URL must point directly to a supported file type.</p>
+                        <TabsContent value="cloud" className="space-y-4 mt-0">
+                          <div className="space-y-4 p-4 border rounded-xl bg-background/30 text-center">
+                            <div className="flex justify-center gap-4 mb-2">
+                              <Button variant="outline" type="button" onClick={() => setImportUrl('gdrive://doc_123')} className="flex items-center gap-2">
+                                <svg className="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M17 5.86L6.63 23.82l9 15.58L26 21.43z"/><path fill="#1976D2" d="M31.41 5.86l-9 15.57 5.2 9h17.9l9.39-16.27z"/><path fill="#4CAF50" d="M36.6 30.43l-5.2-9-10.41 18.01H41l5.63-9.76z"/></svg>
+                                Connect Google Drive
+                              </Button>
+                              <Button variant="outline" type="button" onClick={() => setImportUrl('onedrive://doc_123')} className="flex items-center gap-2">
+                                <svg className="w-5 h-5" viewBox="0 0 24 24"><path fill="#0364B8" d="M12.98 9.38c.17 0 .34.02.5.06a4.42 4.42 0 0 1 4.22-3.15c2.47 0 4.47 2 4.47 4.47 0 .15-.01.3-.03.45a3.83 3.83 0 0 1 3.83 3.82c0 2.11-1.72 3.83-3.83 3.83H7.55A3.55 3.55 0 0 1 4 15.3c0-1.8 1.34-3.28 3.09-3.52a4.4 4.4 0 0 1 4.2-3.3 4.4 4.4 0 0 1 1.69.34z"/></svg>
+                                Connect OneDrive
+                              </Button>
+                            </div>
+                            <div className="space-y-2 text-left mt-6">
+                              <label className="text-sm font-medium text-foreground">Selected Cloud File Path</label>
+                              <Input 
+                                placeholder="Select a file from your connected drive..." 
+                                value={importUrl}
+                                onChange={(e) => setImportUrl(e.target.value)}
+                                className="h-12 bg-background/50"
+                              />
+                            </div>
                           </div>
                         </TabsContent>
 
