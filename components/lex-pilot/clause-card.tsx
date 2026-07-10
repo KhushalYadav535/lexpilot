@@ -8,6 +8,7 @@ import { RiskBadge, type RiskLevel } from './risk-badge'
 interface ClauseCardProps {
   id: string
   title: string
+  category?: string
   text: string
   riskLevel: RiskLevel
   explanation: string
@@ -17,6 +18,7 @@ interface ClauseCardProps {
 export function ClauseCard({
   id,
   title,
+  category,
   text,
   riskLevel,
   explanation,
@@ -38,6 +40,13 @@ export function ClauseCard({
         >
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                {category && (
+                  <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-secondary/50">
+                    {category}
+                  </span>
+                )}
+              </div>
               <h3 className="font-serif font-semibold text-lg text-foreground group-hover:text-primary transition-colors">
                 {title}
               </h3>

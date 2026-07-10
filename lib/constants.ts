@@ -3,6 +3,7 @@ export type RiskLevel = 'critical' | 'high' | 'medium' | 'low'
 export interface Clause {
   id: string
   title: string
+  category?: string
   text: string
   riskLevel: RiskLevel
   explanation: string
@@ -14,12 +15,17 @@ export interface Contract {
   title: string
   date: string
   status: 'review' | 'flagged' | 'approved'
+  riskScore?: number
   clauses: Clause[]
-  summary: {
-    totalClauses: number
-    criticalIssues: number
-    highIssues: number
-    mediumIssues: number
+  summary?: {
+    totalClauses?: number
+    criticalIssues?: number
+    highIssues?: number
+    mediumIssues?: number
+    businessSummary?: string
+    legalSummary?: string
+    financialObligations?: string[]
+    keyDates?: string[]
   }
 }
 
