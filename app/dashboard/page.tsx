@@ -59,6 +59,18 @@ export default function DashboardPage() {
     loadContracts()
   }, [])
 
+  // Poll for updates if any contract is currently analyzing
+  useEffect(() => {
+    const isAnalyzing = contracts.some((c: any) => c.status === 'review' && c.riskScore === 0);
+    if (!isAnalyzing) return;
+
+    const interval = setInterval(() => {
+      loadContracts();
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [contracts]);
+
   const loadContracts = async () => {
     try {
       const data = await fetchAPI('/contracts')
@@ -485,7 +497,7 @@ export default function DashboardPage() {
                         </div>
                         <div className="p-5 rounded-2xl bg-card border border-border shadow-sm">
                           <h3 className="text-sm font-medium text-muted-foreground">High Risk</h3>
-                          <p className="text-3xl font-bold mt-2 text-red-500">{contracts.filter((c: any) => (c.analysis?.riskScore || 0) > 70).length || 0}</p>
+                          <p className="text-3xl font-bold mt-2 text-red-500">{contracts.filter((c: any) => ((c.riskScore ?? c.analysis?.riskScore) || 0) > 70).length || 0}</p>
                         </div>
                       </div>
 
@@ -527,7 +539,7 @@ export default function DashboardPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                           {filteredContracts.map((contract: any) => {
                             const id = contract._id || contract.id
-                            const riskScore = contract.analysis?.riskScore || 0
+                            const riskScore = contract.riskScore ?? contract.analysis?.riskScore ?? 0
                             return (
                               <div 
                                 key={id}
@@ -555,11 +567,12 @@ export default function DashboardPage() {
                                 
                                 <div className="flex items-center justify-between mt-auto">
                                   <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                    (contract.status === 'review' && riskScore === 0) ? 'bg-blue-500/10 text-blue-500 animate-pulse' :
                                     riskScore > 70 ? 'bg-red-500/10 text-red-500' : 
                                     riskScore > 40 ? 'bg-amber-500/10 text-amber-500' : 
                                     'bg-green-500/10 text-green-500'
                                   }`}>
-                                    Risk: {riskScore}
+                                    {(contract.status === 'review' && riskScore === 0) ? 'Analyzing...' : `Risk: ${riskScore}`}
                                   </span>
                                   <span className="text-xs font-medium text-muted-foreground bg-secondary px-2.5 py-1 rounded-full capitalize">
                                     {contract.status || 'review'}

@@ -30,8 +30,12 @@ export function ExecutiveSummary({ contract }: { contract: Contract }) {
           <span className="text-sm text-muted-foreground mb-1">Overall Risk Score</span>
           <div className="flex items-center gap-3">
             <Progress value={riskScore} className="w-32 h-2" />
-            <span className={`font-bold ${riskScore > 70 ? 'text-lex-risk-critical' : riskScore > 40 ? 'text-lex-risk-high' : 'text-lex-success'}`}>
-              {riskScore > 70 ? 'Critical' : riskScore > 40 ? 'High' : 'Low'} ({riskScore})
+            <span className={`font-bold ${
+              (contract.status === 'review' && riskScore === 0) ? 'text-blue-500 animate-pulse' :
+              riskScore > 70 ? 'text-lex-risk-critical' : 
+              riskScore > 40 ? 'text-lex-risk-high' : 'text-lex-success'
+            }`}>
+              {(contract.status === 'review' && riskScore === 0) ? 'Analyzing...' : `${riskScore > 70 ? 'Critical' : riskScore > 40 ? 'High' : 'Low'} (${riskScore})`}
             </span>
           </div>
         </div>

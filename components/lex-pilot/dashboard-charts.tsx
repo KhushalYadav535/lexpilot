@@ -43,7 +43,7 @@ export function DashboardCharts({ contracts }: DashboardChartsProps) {
   const riskData = useMemo(() => {
     let low = 0, med = 0, high = 0
     contracts.forEach(c => {
-      const score = c.analysis?.riskScore || 0
+      const score = c.riskScore ?? c.analysis?.riskScore ?? 0
       if (score > 70) high++
       else if (score > 40) med++
       else low++
@@ -55,20 +55,36 @@ export function DashboardCharts({ contracts }: DashboardChartsProps) {
     ]
   }, [contracts])
 
-  // 3. Activity Timeline (Mock trend since we don't have historical dates on all contracts)
+  // 3. Weekly Activity — real data from contract.createdAt timestamps
   const activityData = useMemo(() => {
-    // Generate a beautiful 7-day trend based on the total number of contracts
-    const base = Math.max(1, Math.floor(contracts.length / 5))
-    return [
-      { day: 'Mon', reviewed: base + 2, uploaded: base + 4 },
-      { day: 'Tue', reviewed: base + 5, uploaded: base + 2 },
-      { day: 'Wed', reviewed: base + 3, uploaded: base + 6 },
-      { day: 'Thu', reviewed: base + 8, uploaded: base + 3 },
-      { day: 'Fri', reviewed: base + 4, uploaded: base + 5 },
-      { day: 'Sat', reviewed: base + 1, uploaded: base + 1 },
-      { day: 'Sun', reviewed: base + 2, uploaded: base + 3 },
-    ]
-  }, [contracts.length])
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const today = new Date();
+
+    // Build last 7 days (oldest first)
+    const last7 = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(today);
+      d.setDate(today.getDate() - (6 - i));
+      return {
+        day: days[d.getDay()],
+        date: d.toDateString(),
+        uploaded: 0,
+        reviewed: 0,
+      };
+    });
+
+    contracts.forEach(c => {
+      if (!c.createdAt) return;
+      const created = new Date(c.createdAt).toDateString();
+      const slot = last7.find(s => s.date === created);
+      if (!slot) return;
+      slot.uploaded++;
+      if (c.status === 'approved' || c.status === 'flagged') {
+        slot.reviewed++;
+      }
+    });
+
+    return last7;
+  }, [contracts]);
 
 
   if (contracts.length === 0) return null
@@ -171,7 +187,7 @@ export function DashboardCharts({ contracts }: DashboardChartsProps) {
       <Card className="shadow-sm border-border bg-card lg:col-span-1 md:col-span-2">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg">Weekly Activity</CardTitle>
-          <CardDescription>Contracts reviewed vs uploaded</CardDescription>
+          <CardDescription>Contracts uploaded & reviewed — last 7 days</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-[220px] w-full mt-2">

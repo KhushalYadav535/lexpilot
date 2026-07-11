@@ -16,6 +16,8 @@ export interface Contract {
   date: string
   status: 'review' | 'flagged' | 'approved'
   riskScore?: number
+  createdAt?: string
+  updatedAt?: string
   clauses: Clause[]
   summary?: {
     totalClauses?: number
